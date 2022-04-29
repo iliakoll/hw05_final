@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load cache %}
+{% block title %}Последние обновления на сайте{% endblock %}
+{% block content %}
+  <h1><span style="color:red">П</span>оследние обновления на сайте</h1>
+  {% include 'posts/includes/switcher.html' %}
+  {% cache 20 index_page page_obj.number %}
+    {% for post in page_obj %}
+      <article>
+        {% include 'posts/includes/post.html' %}
+        <a href="{% url 'posts:post_detail' post.pk %}"
+          >подробная информация 
+        </a><br>
+        {% if post.group %}   
+          <a
+            href="{% url 'posts:group_list' post.group.slug %}"
+            >все записи группы
+          </a>
+        {% endif %}
+      </article>
+      {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+  {% endcache %} 
+  {% include 'posts/includes/paginator.html' %}
+{% endblock %}
