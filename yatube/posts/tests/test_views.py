@@ -194,6 +194,8 @@ class PaginatorViewsTest(TestCase):
                 kwargs={'username': f'{cls.post_15.author.username}'}
             ): 'posts/profile.html'
         }
+        cls.NUM_POSTS_FIRST_PAGE = 10
+        cls.NUM_POSTS_NEXT_PAGE = 5
 
     def setUp(self):
         self.user_1 = User.objects.create_user(username='HasNoName_2')
@@ -204,13 +206,19 @@ class PaginatorViewsTest(TestCase):
         """Количество постов на первой странице равно 10."""
         for test_url in self.list_urls.keys():
             response = self.authoriz_client.get(test_url)
-            self.assertEqual(len(response.context['page_obj']), 10)
+            self.assertEqual(
+                len(response.context['page_obj']),
+                self.NUM_POSTS_FIRST_PAGE
+            )
 
     def test_second_page_contains_ten_records(self):
         """Количество постов на второй странице равно 5."""
         for test_url in self.list_urls.keys():
             response = self.authoriz_client.get(test_url + '?page=2')
-            self.assertEqual(len(response.context['page_obj']), 5)
+            self.assertEqual(
+                len(response.context['page_obj']),
+                self.NUM_POSTS_NEXT_PAGE
+            )
 
 
 class CasheViewsTest(TestCase):
@@ -263,10 +271,6 @@ class FollowTest(TestCase):
             author=cls.author,
             text='Тестовый текст',
         )
-        cls.follow = Follow.objects.create(
-            user=cls.user,
-            author=cls.author
-        )
 
     def setUp(self):
         self.guest_client = Client()
@@ -297,6 +301,7 @@ class FollowTest(TestCase):
 
     def test_unsubscription(self):
         """Проверка отписки."""
+        Follow.objects.create(user=self.user, author=self.author)
         response = self.authorized_client.post(reverse(
             'posts:profile_unfollow',
             args={self.author}
@@ -315,18 +320,11 @@ class FollowTest(TestCase):
 
     def test_post_for_follower(self):
         """Новый пост появляется в ленте у подписчика."""
-        response = self.authorized_client.post(reverse(
-            'posts:profile_follow',
-            args={self.author}
-        ))
+        Follow.objects.create(user=self.user, author=self.author)
         response = self.authorized_client.post(reverse('posts:follow_index'))
         self.assertTrue(self.post in response.context['page_obj'].object_list)
 
     def test_post_not_for_unfollower(self):
         """Новый пост НЕ появляется в ленте у НЕ подписчика."""
-        response = self.authorized_client.post(reverse(
-            'posts:profile_unfollow',
-            args={self.author}
-        ))
         response = self.authorized_client.post(reverse('posts:follow_index'))
         self.assertFalse(self.post in response.context['page_obj'].object_list)
