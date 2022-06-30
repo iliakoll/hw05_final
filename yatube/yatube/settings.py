@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%x%gax(%bxovz5(19vh6ll#^75e%ziyli355s!1r9)%jbd9=jw'
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+SECRET_KEY = 'SECRET_KEY'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -143,6 +146,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'posts:index'
